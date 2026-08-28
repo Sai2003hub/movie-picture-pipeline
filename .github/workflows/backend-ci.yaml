@@ -1,0 +1,76 @@
+name: Backend Continuous Integration
+
+# Trigger on-demand (manual) and on PRs targeting main,
+# but only when backend files change.
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "starter/backend/**"
+
+defaults:
+  run:
+    working-directory: starter/backend
+
+env:
+  PYTHON_VERSION: "3.10"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pipenv"
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies (including dev)
+        run: pipenv install --dev
+
+      - name: Run flake8
+        run: pipenv run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pipenv"
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies (including dev)
+        run: pipenv install --dev
+
+      - name: Run test suite
+        run: pipenv run test
+
+  build:
+    name: Build
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        working-directory: starter/backend
+        run: |
+          docker build --tag=mp-backend:${{ github.sha }} .
