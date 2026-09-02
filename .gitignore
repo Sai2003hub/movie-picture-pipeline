@@ -1,0 +1,6 @@
+setup/terraform/.terraform/
+setup/terraform/.terraform.lock.hcl
+setup/terraform/*.tfstate
+setup/terraform/*.tfstate.*
+setup/terraform/*.tfstate.*
+setup/terraform/*.tfavrs
